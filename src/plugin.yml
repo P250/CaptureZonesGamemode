@@ -1,0 +1,9 @@
+main: me.johnnyboy.capturezonesgamemode.Main
+version: 1.0
+api-version: 1.15
+name: CaptureZonesGamemode
+
+commands:
+  capturezones:
+    usage: /capturezone help
+    aliases: [cz]
