@@ -1,12 +1,18 @@
 package me.johnnyboy.capturezonesgamemode.handlers;
 
 import me.johnnyboy.capturezonesgamemode.Main;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.*;
 
+import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -16,23 +22,25 @@ public class GameQueue extends BukkitRunnable {
 
     private Main plugin;
     private FileConfiguration config;
-    private GameQueueHandler gameQueueHandler;
-    private World world;
+
+    private ScoreboardQueueAnimator animator;
+
     private int playerCount = 0;
     private int maxPlayers;
     private int minPlayers;
     private int seconds;
 
-    public GameQueue(Main instance, World world) {
+    public GameQueue(Main instance) {
         plugin = instance;
+
         config = plugin.getCommandConfig();
-        this.world = world;
-        gameQueueHandler = plugin.getGameQueueHandler();
 
         minPlayers = config.getInt("capturezones.queue.minplayers");
         maxPlayers = config.getInt("capturezones.queue.maxplayers");
-
         seconds = config.getInt("capturezones.queue.queuetime");
+;
+        animator = new ScoreboardQueueAnimator(plugin, this);
+        animator.runTaskTimer(plugin, 0, 1L);
     }
 
     @Override
@@ -42,10 +50,14 @@ public class GameQueue extends BukkitRunnable {
                 for (Player pl : players.values()) {
                     String error = config.getString("capturezones.queue.notenoughplayers");
                     pl.sendMessage(cc(error.replace("{prefix}", Main.PLUGIN_PREFIX)));
+
+                    seconds = config.getInt("capturezones.queue.queuetime");
                 }
+                return;
             }
+            // cancel animator
+            animator.cancel();
             // start game
-            gameQueueHandler.removeQueue(world);
             this.cancel();
         }
         seconds -= 1;
@@ -56,13 +68,14 @@ public class GameQueue extends BukkitRunnable {
                     pl.sendMessage(cc("&eGame starting in " + seconds + " seconds."));
                     break;
                 case 20:
-                    pl.sendMessage(cc("&eGame starting in " + seconds + " seconds."));
+                    pl.sendMessage(cc("&eGame starting in &6" + seconds + "&r&e seconds."));
                     break;
                 case 10:
-                    pl.sendMessage(cc("&eGame starting in " + seconds + " seconds."));
+                    pl.sendMessage(cc("&eGame starting in &c" + seconds + "&r&e seconds."));
                     break;
                 case 1:
-                    pl.sendMessage(cc("&eGame starting in " + seconds + " second."));
+                    pl.playSound(pl.getLocation(), Sound.BLOCK_TRIPWIRE_CLICK_ON, 1, 1);
+                    pl.sendMessage(cc("&eGame starting in &c" + seconds + "&e second."));
                     exitLoop = true;
                     break;
             }
@@ -72,7 +85,8 @@ public class GameQueue extends BukkitRunnable {
             }
 
             if (isBetween(seconds, 1, 5)) {
-                pl.sendMessage(cc("&eGame starting in " + seconds + " seconds."));
+                pl.playSound(pl.getLocation(), Sound.BLOCK_TRIPWIRE_CLICK_ON, 1, 1);
+                pl.sendMessage(cc("&eGame starting in &c" + seconds + "&e seconds."));
             }
         }
     }
@@ -81,8 +95,8 @@ public class GameQueue extends BukkitRunnable {
         if (playerCount > maxPlayers) {
             return false;
         }
-        playerCount += 1;
         players.put(uuid, pl);
+        playerCount = players.size();
 
         return true;
     }
@@ -96,6 +110,9 @@ public class GameQueue extends BukkitRunnable {
     }
 
     public void cancelQueue() {
+        for (Player pl : players.values()) {
+            pl.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        }
         cancel();
     }
 
@@ -107,5 +124,27 @@ public class GameQueue extends BukkitRunnable {
         return lower <= num && num <= upper;
     }
 
+
+    public Collection<Player> getPlayers() {
+        return players.values();
+    }
+
+    public void removePlayer(UUID uuid) {
+        players.remove(uuid);
+        Player pl = Bukkit.getPlayer(uuid);
+        pl.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+    }
+
+    public void cancelAnimator() {
+        animator.cancel();
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public int getSeconds() {
+        return seconds;
+    }
 
 }

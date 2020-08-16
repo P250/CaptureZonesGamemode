@@ -7,6 +7,6 @@ import java.util.HashMap;
 
 public class ActiveGamesHandler {
     // TODO
-    private HashMap<World, BukkitTask> activeGames = new HashMap<World, BukkitTask>();
+    private HashMap<World, CaptureZonesGame> activeGames = new HashMap<World, CaptureZonesGame>();
 
 }

@@ -52,13 +52,13 @@ public class CaptureZonesCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length == 1 && args[0].equalsIgnoreCase("joinqueue") || args[0].equals("joingame")) {
+        if (args.length == 1 && args[0].equals("join") || args[0].equalsIgnoreCase("joinqueue") || args[0].equals("joingame")) {
             World world = pl.getWorld();
             boolean queueActive = gameQueueHandler.gameQueueActive(world);
 
             // checks if there's a queue active for the world the player is in, if not, make one.
             if (!(queueActive)) {
-                queue = new GameQueue(plugin, world);
+                queue = new GameQueue(plugin);
                 queue.runTaskTimer(plugin, 0L, 20L);
                 gameQueueHandler.createNewGameQueue(world, queue);
             }
@@ -84,8 +84,33 @@ public class CaptureZonesCommand implements CommandExecutor {
             pl.sendMessage(cc(joinedQueueMessage.replace("{prefix}", Main.PLUGIN_PREFIX)));
             
         }
+        // leave queue/game command
+        if (args.length == 1 && args[0].equals("leave") || args[0].equals("leavegame") || args[0].equals("leavequeue")) {
+            boolean inQueue = gameQueueHandler.isPlayerInQueue(pl.getUniqueId(), pl.getWorld());
+            if (inQueue) {
+                if (gameQueueHandler.getQueue(pl.getWorld()).getPlayers().size() == 1) {
+                    gameQueueHandler.getQueue(pl.getWorld()).cancelAnimator();
+                } else {
+                    gameQueueHandler.removePlayerFromQueue(pl.getUniqueId(), pl.getWorld());
+                }
+
+                gameQueueHandler.removeQueue(pl.getWorld());
+
+                String success = config.getString("capturezones.queue.queueleave");
+                pl.sendMessage(cc(success.replace("{prefix}", Main.PLUGIN_PREFIX)));
+                return true;
+            }
+            // TODO
+            // boolean inGame
+            // if (inGame)
+        }
+
+
+
+
         return true;
     }
+
 
     private String cc(String str) {
         return ChatColor.translateAlternateColorCodes('&', str);

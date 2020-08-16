@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 
 public class GameQueueHandler {
@@ -35,7 +36,21 @@ public class GameQueueHandler {
     }
 
     public void removeQueue(World world) {
+        getQueue(world).cancelQueue();
         queueHandler.remove(world);
         return;
+    }
+
+    public boolean isPlayerInQueue(UUID uuid, World world) {
+        GameQueue queue = queueHandler.get(world);
+        if (queue != null && queue.isPlayerInQueue(uuid)) {
+            return true;
+        }
+        return false;
+    }
+
+    public void removePlayerFromQueue(UUID uuid, World world) {
+        GameQueue queue = queueHandler.get(world);
+        queue.removePlayer(uuid);
     }
 }
