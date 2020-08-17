@@ -51,10 +51,9 @@ public class GameQueueHandler {
 
     public void removePlayerFromQueue(UUID uuid, World world) {
         GameQueue queue = queueHandler.get(world);
-        queue.removePlayer(uuid);
 
-        if (queue.getPlayers().size() == 0) {
-            queue.cancelQueue();
+        if (queue.getPlayers().size() == 1) {
+            queue.removePlayer(uuid);
             queue.cancelAnimator();
             removeQueue(world);
         }

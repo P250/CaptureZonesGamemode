@@ -3,14 +3,16 @@ package me.johnnyboy.capturezonesgamemode.handlers;
 import me.johnnyboy.capturezonesgamemode.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ScoreboardQueueAnimator extends BukkitRunnable {
 
@@ -59,7 +61,6 @@ public class ScoreboardQueueAnimator extends BukkitRunnable {
             maxIndex = text.size() - 1;
             title = text.get(0);
         }
-        
         if (index > maxIndex) {
             index = 0;
         }
@@ -113,7 +114,7 @@ public class ScoreboardQueueAnimator extends BukkitRunnable {
         time.setScore(2);
         Score blank0 = objective.getScore("");
         blank0.setScore(1);
-        Score website = objective.getScore(cc("&ewww.google.co.uk"));
+        Score website = objective.getScore(cc("&ewww.google.com"));
         website.setScore(0);
 
 
