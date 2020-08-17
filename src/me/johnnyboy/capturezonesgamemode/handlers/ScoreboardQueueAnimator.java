@@ -43,7 +43,6 @@ public class ScoreboardQueueAnimator extends BukkitRunnable {
         this.queue = queue;
         scoreboardConfig = plugin.getScoreboardConfig();
         players = queue.getPlayers();
-
     }
 
     @Override

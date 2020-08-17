@@ -18,6 +18,14 @@ public class PlayerLeave implements Listener {
         gameQueue = instance.getGameQueueHandler();
     }
 
+    private Main plugin;
+    private GameQueueHandler gameQueue;
+
+    public PlayerLeave(Main instance) {
+        plugin = instance;
+        gameQueue = instance.getGameQueueHandler();
+    }
+
     @EventHandler
     public void onDeath(PlayerQuitEvent e) {
         Player pl = e.getPlayer();
