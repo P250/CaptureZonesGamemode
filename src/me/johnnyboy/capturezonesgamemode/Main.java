@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,8 +20,10 @@ public class Main extends JavaPlugin {
     private HashMap<String, Object> scoreboardDefaults;
     private FileConfiguration configCommands;
     private FileConfiguration scoreboardConfig;
+    private FileConfiguration gameData;
     private File scoreboardConfigFile;
     private File configCommandsFile;
+    private File gameDataFile;
 
     private GameQueueHandler gameQueueHandler;
 
@@ -43,6 +46,7 @@ public class Main extends JavaPlugin {
             defaults.put("capturezones.command.usage", usage);
             defaults.put("capturezones.command.prefix", "&8&l[&6CaptureZones&8]&r");
             defaults.put("capturezones.command.reload", "{prefix} &aReloaded config.");
+            defaults.put("capturezones.command.set_team_spawn_point", "{prefix} &cSet {team}&c's spawn point to {x} {y} {z}");
 
             defaults.put("capturezones.queue.maxplayers", 8);
             defaults.put("capturezones.queue.minplayers", 2);
@@ -71,10 +75,39 @@ public class Main extends JavaPlugin {
         scoreboardConfig = YamlConfiguration.loadConfiguration(scoreboardConfigFile);
     }
 
+    private void initGameDataConfig() {
+        gameDataFile = new File(getDataFolder(), "capturezones_gamedata.yml");
+        gameData = YamlConfiguration.loadConfiguration(gameDataFile);
+
+        HashMap<String, Object> defaults;
+        if (!(gameDataFile.exists())) {
+            defaults = new HashMap<String, Object>();
+
+            defaults.put("capturezones.spawnpoints.blue.x", 0);
+            defaults.put("capturezones.spawnpoints.blue.y", 0);
+            defaults.put("capturezones.spawnpoints.blue.z", 0);
+
+            defaults.put("capturezones.spawnpoints.red.x", 0);
+            defaults.put("capturezones.spawnpoints.red.y", 0);
+            defaults.put("capturezones.spawnpoints.red.z", 0);
+
+
+            gameData.addDefaults(defaults);
+            gameData.options().copyDefaults(true);
+        }
+        try {
+            gameData.save(gameDataFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Override
     public void onEnable() {
         initCommandConfig();
         initScoreboardConfig();
+        initGameDataConfig();
         gameQueueHandler = new GameQueueHandler(this);
         getCommand("capturezones").setExecutor(new CaptureZonesCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerLeave(this), this);
@@ -103,8 +136,20 @@ public class Main extends JavaPlugin {
         }
     }
 
+    public FileConfiguration getGameConfig() {
+        return gameData;
+    }
+
     public FileConfiguration getScoreboardConfig() {
         return scoreboardConfig;
+    }
+
+    public void saveGameConfig() {
+        try {
+            gameData.save(gameDataFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

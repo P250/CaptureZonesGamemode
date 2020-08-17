@@ -17,12 +17,14 @@ public class CaptureZonesCommand implements CommandExecutor {
 
     private Main plugin;
     private FileConfiguration config;
+    private FileConfiguration gameConfig;
     private GameQueueHandler gameQueueHandler;
     private GameQueue queue;
 
     public CaptureZonesCommand(Main instance) {
         plugin = instance;
         config = instance.getCommandConfig();
+        gameConfig = instance.getGameConfig();
         gameQueueHandler = instance.getGameQueueHandler();
     }
 
@@ -94,20 +96,73 @@ public class CaptureZonesCommand implements CommandExecutor {
                 pl.sendMessage(cc(success.replace("{prefix}", Main.PLUGIN_PREFIX)));
                 return true;
             }
+            return true;
             // TODO
             // boolean inGame
             // if (inGame)
         }
 
+        if (args.length == 1 && args[0].equals("setbluespawn") || args[0].equals("setredspawn")) {
+            String team = args[0];
+            String teamPath = getTeamPath(team);
 
+            double x = pl.getLocation().getX();
+            double y = pl.getLocation().getY();
+            double z = pl.getLocation().getZ();
 
+            for (String key : gameConfig.getConfigurationSection(teamPath).getKeys(true)) {
+                switch (key) {
+                    case "x":
+                        gameConfig.set(teamPath + ".x", x);
+                        break;
+                    case "y":
+                        gameConfig.set(teamPath + ".y", y);
+                        break;
+                    case "z":
+                        gameConfig.set(teamPath + ".z", z);
+                        break;
+                }
+            }
+
+            String teamName = getTeamColour(teamPath);
+
+            String stringX = "&b" + String.valueOf(Math.round(x));
+            String stringY = String.valueOf(Math.round(y));
+            String stringZ = String.valueOf(Math.round(z));
+
+            String success = config.getString("capturezones.command.set_team_spawn_point");
+            pl.sendMessage(cc(success.replace("{prefix}", Main.PLUGIN_PREFIX).replace("{team}", teamName).replace("{x}", stringX).replace("{y}", stringY).replace("{z}", stringZ)));
+
+            System.out.println("X: " + x + " Y: " + y + " Z: " + z);
+
+            plugin.saveGameConfig();
+
+        }
 
         return true;
     }
 
-
-    private String cc(String str) {
-        return ChatColor.translateAlternateColorCodes('&', str);
+    private String getTeamPath(String str) {
+        if (str.equalsIgnoreCase("setbluespawn")) {
+            return "capturezones.spawnpoints.blue";
+        } else if (str.equalsIgnoreCase("setredspawn")) {
+            return "capturezones.spawnpoints.red";
+        } else {
+            return "";
+        }
     }
 
+    private String getTeamColour(String str) {
+        String teamName = str.substring(str.lastIndexOf(".") + 1);
+        if (teamName.equals("blue")) {
+            return "&9" + teamName;
+        } else if (teamName.equals("red")) {
+            return "&c" + teamName;
+        }
+        return "&cerror, {team} unresolved";
+    }
+
+    private String cc (String str){
+        return ChatColor.translateAlternateColorCodes('&', str);
+    }
 }
