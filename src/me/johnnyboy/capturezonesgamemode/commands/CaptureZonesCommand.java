@@ -88,13 +88,7 @@ public class CaptureZonesCommand implements CommandExecutor {
         if (args.length == 1 && args[0].equals("leave") || args[0].equals("leavegame") || args[0].equals("leavequeue")) {
             boolean inQueue = gameQueueHandler.isPlayerInQueue(pl.getUniqueId(), pl.getWorld());
             if (inQueue) {
-                if (gameQueueHandler.getQueue(pl.getWorld()).getPlayers().size() == 1) {
-                    gameQueueHandler.getQueue(pl.getWorld()).cancelAnimator();
-                } else {
-                    gameQueueHandler.removePlayerFromQueue(pl.getUniqueId(), pl.getWorld());
-                }
-
-                gameQueueHandler.removeQueue(pl.getWorld());
+                gameQueueHandler.removePlayerFromQueue(pl.getUniqueId(), pl.getWorld());
 
                 String success = config.getString("capturezones.queue.queueleave");
                 pl.sendMessage(cc(success.replace("{prefix}", Main.PLUGIN_PREFIX)));

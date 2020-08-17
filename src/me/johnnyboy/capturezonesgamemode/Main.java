@@ -1,6 +1,7 @@
 package me.johnnyboy.capturezonesgamemode;
 
 import me.johnnyboy.capturezonesgamemode.commands.CaptureZonesCommand;
+import me.johnnyboy.capturezonesgamemode.events.PlayerLeave;
 import me.johnnyboy.capturezonesgamemode.handlers.GameQueueHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -76,6 +77,7 @@ public class Main extends JavaPlugin {
         initScoreboardConfig();
         gameQueueHandler = new GameQueueHandler(this);
         getCommand("capturezones").setExecutor(new CaptureZonesCommand(this));
+        Bukkit.getPluginManager().registerEvents(new PlayerLeave(this), this);
 
         PLUGIN_PREFIX = configCommands.getString("capturezones.command.prefix");
     }
